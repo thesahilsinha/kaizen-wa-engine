@@ -1,17 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 
-// Master DB client (your Supabase)
-export const masterSupabase = createClient(
-  process.env.MASTER_SUPABASE_URL,
-  process.env.MASTER_SUPABASE_SERVICE_KEY
-)
-
-// Dynamically create client Supabase per client
-export function getClientSupabase(url, serviceKey) {
-  return createClient(url, serviceKey)
+const supabaseOptions = {
+  realtime: { transport: ws }
 }
 
-// Fetch client config from master DB by clientId
+export const masterSupabase = createClient(
+  process.env.MASTER_SUPABASE_URL,
+  process.env.MASTER_SUPABASE_SERVICE_KEY,
+  supabaseOptions
+)
+
+export function getClientSupabase(url, serviceKey) {
+  return createClient(url, serviceKey, supabaseOptions)
+}
+
 export async function getClientConfig(clientId) {
   const { data, error } = await masterSupabase
     .from('master_clients')
